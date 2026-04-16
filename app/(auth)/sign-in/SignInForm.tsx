@@ -5,6 +5,24 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/ui/Button";
 import { Input, Label } from "@/ui/Input";
 
+function humanise(code: string | null | undefined): string | null {
+  if (!code) return null;
+  switch (code) {
+    case "Configuration":
+      return "The server is not configured correctly. AUTH_SECRET or trustHost may be missing on the host. Check the server logs.";
+    case "CredentialsSignin":
+    case "CallbackRouteError":
+      return "Invalid email or password.";
+    case "AccessDenied":
+    case "Forbidden":
+      return "Your account does not have access.";
+    case "SessionRequired":
+      return "Please sign in to continue.";
+    default:
+      return `Sign-in failed (${code}).`;
+  }
+}
+
 export function SignInForm({
   error: initialError,
   callbackUrl,
@@ -15,7 +33,7 @@ export function SignInForm({
   const [email, setEmail] = useState("owner@example.com");
   const [password, setPassword] = useState("demo-password");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(initialError ?? null);
+  const [error, setError] = useState<string | null>(humanise(initialError));
 
   async function onSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
@@ -28,8 +46,12 @@ export function SignInForm({
       callbackUrl: callbackUrl ?? "/events",
     });
     setLoading(false);
-    if (!res || res.error) {
-      setError("Invalid email or password.");
+    if (!res) {
+      setError("Couldn't reach the server. Please try again.");
+      return;
+    }
+    if (res.error) {
+      setError(humanise(res.error) ?? "Invalid email or password.");
       return;
     }
     window.location.href = res.url ?? callbackUrl ?? "/events";

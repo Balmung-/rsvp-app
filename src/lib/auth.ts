@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { redirect } from "next/navigation";
 import { prisma } from "./db";
 import { verifyPassword } from "./hash";
 import { z } from "zod";
@@ -10,8 +11,16 @@ const CredentialsSchema = z.object({
 });
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
+  // trustHost is REQUIRED by Auth.js v5 in production when AUTH_URL isn't set.
+  // Without it every POST to /api/auth/* fails host validation and the user
+  // is bounced to /api/auth/error?error=Configuration (NextAuth's unbranded
+  // dark error page).
+  trustHost: true,
   session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
-  pages: { signIn: "/sign-in" },
+  // Route all auth UI (including errors) through our own /sign-in page
+  // instead of NextAuth's built-in dark-themed error screen. The sign-in
+  // page reads ?error= and renders it inline with our design.
+  pages: { signIn: "/sign-in", error: "/sign-in" },
   secret: process.env.AUTH_SECRET,
   providers: [
     Credentials({
@@ -72,14 +81,50 @@ export type SessionUser = {
   locale: string;
 };
 
+/**
+ * For server components/pages: redirect unauthenticated users to /sign-in.
+ * Do not use in API routes — use requireUserApi for those.
+ */
 export async function requireUser(): Promise<SessionUser> {
   const session = await auth();
-  if (!session?.user) throw new Error("UNAUTHENTICATED");
+  if (!session?.user) redirect("/sign-in");
   return session.user as unknown as SessionUser;
 }
 
-export async function requireRole(allowed: Array<"OWNER" | "EDITOR" | "VIEWER">): Promise<SessionUser> {
+export async function requireRole(
+  allowed: Array<"OWNER" | "EDITOR" | "VIEWER">
+): Promise<SessionUser> {
   const user = await requireUser();
-  if (!allowed.includes(user.role)) throw new Error("FORBIDDEN");
+  if (!allowed.includes(user.role)) redirect("/sign-in?error=Forbidden");
   return user;
+}
+
+/**
+ * For API routes. Returns the user or null. Caller handles the response —
+ * typically { status: 401 }.
+ */
+export async function getUserApi(): Promise<SessionUser | null> {
+  const session = await auth();
+  return (session?.user as unknown as SessionUser | undefined) ?? null;
+}
+
+export async function requireUserApi(): Promise<
+  { ok: true; user: SessionUser } | { ok: false; status: 401 | 403; message: string }
+> {
+  const user = await getUserApi();
+  if (!user) return { ok: false, status: 401, message: "UNAUTHENTICATED" };
+  return { ok: true, user };
+}
+
+export async function requireRoleApi(
+  allowed: Array<"OWNER" | "EDITOR" | "VIEWER">
+): Promise<
+  { ok: true; user: SessionUser } | { ok: false; status: 401 | 403; message: string }
+> {
+  const gate = await requireUserApi();
+  if (!gate.ok) return gate;
+  if (!allowed.includes(gate.user.role)) {
+    return { ok: false, status: 403, message: "FORBIDDEN" };
+  }
+  return gate;
 }
