@@ -8,6 +8,10 @@ Hand [BUILD.md](./BUILD.md) to an AI coding agent. It contains the complete, ord
 
 The build sheet is exhaustive on purpose — data model, provider contracts, UX, motion, security, tests, and deploy steps are all force-bearing. Nothing is optional.
 
+## Client
+
+Saudi Ministry of Media (وزارة الإعلام). Brand accent `#009B87`. Arabic-first.
+
 ## Stack
 
 Next.js 15 · TypeScript · Tailwind · Radix · Prisma · PostgreSQL · pg-boss · React Email · next-intl · Playwright

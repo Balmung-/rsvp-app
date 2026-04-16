@@ -217,7 +217,7 @@ model Organization {
   defaultLocale  String   @default("en")
   defaultTimezone String  @default("Asia/Riyadh")
   logoUrl        String?
-  brandAccent    String   @default("#8B6D3F")
+  brandAccent    String   @default("#009B87")
   supportEmail   String?
   supportPhone   String?
   createdAt      DateTime @default(now())
@@ -890,8 +890,9 @@ Exposed as CSS variables (`src/config/tokens.css`). Org's `brandAccent` is injec
   --text-subtle:   #8A8A8F;
   --border:        #EAE8E3;
   --border-strong: #D9D5CC;
-  --accent:        #8B6D3F;           /* overridden per org */
+  --accent:        #009B87;           /* Ministry of Media teal; overridden per org */
   --accent-ink:    #FFFFFF;           /* text over accent */
+  --accent-strong: #00705E;           /* darker accent for small text where WCAG AA on white is tight */
   --danger:        #B3261E;
   --success:       #1F6B3A;
 
@@ -990,11 +991,11 @@ Unit (Vitest):
 ## 20. Seed data (`prisma/seed.ts`)
 
 Creates:
-- 1 Organization ("Majlis Events"), brandAccent `#8B6D3F`.
-- 3 Users: `owner@example.com` (Owner), `editor@example.com` (Editor), `viewer@example.com` (Viewer). Password for all: `demo-password`.
-- 4 Templates: SMS-EN, SMS-AR, Email-EN, Email-AR, all marked `isDefault` within their (channel, locale).
-- 1 Event: "Eid Reception 2026", `startsAt` = `2026-05-15T20:00:00+03:00`, venue "The Ritz-Carlton, Riyadh", `heroImageUrl` placeholder.
-- 40 Guests, 40 Invitees on the event, mixed `preferredLocale`, distributed E.164 Saudi numbers (+9665...).
+- 1 Organization: name `Ministry of Media`, slug `ministry-of-media`, `defaultLocale = "ar"`, `defaultTimezone = "Asia/Riyadh"`, `brandAccent = "#009B87"`, `logoUrl = "/brand/ministry-of-media.png"`, `supportEmail = "events@mom.example.sa"`.
+- 3 Users: `owner@example.com` (Owner), `editor@example.com` (Editor), `viewer@example.com` (Viewer). Password for all: `demo-password`. Locale `ar`.
+- 4 Templates: SMS-EN, SMS-AR, Email-EN, Email-AR, all marked `isDefault` within their (channel, locale). Arabic copy is primary; English is secondary.
+- 1 Event: title `حفل وزارة الإعلام السنوي` (EN: `Ministry of Media Annual Reception`), slug `annual-reception-2026`, `startsAt` = `2026-05-15T20:00:00+03:00`, venue `The Ritz-Carlton, Riyadh`, `heroImageUrl` placeholder, `timezone = "Asia/Riyadh"`.
+- 40 Guests, 40 Invitees on the event, mixed `preferredLocale` (majority `ar`), distributed E.164 Saudi numbers (+9665...).
 - 1 Campaign in DRAFT (so "Send now" is visible).
 
 Seed uses `npx prisma db seed` via package.json.
@@ -1059,6 +1060,27 @@ Execute top-to-bottom. Do not jump ahead.
 5. Redeploy.
 
 The rest of the app is unchanged.
+
+## 24. Client brand: Ministry of Media (KSA)
+
+This app is being built for the **Saudi Ministry of Media** (وزارة الإعلام). Brand decisions are locked as follows. Seed data and `--accent` default reflect these.
+
+- **Organization name (EN):** Ministry of Media
+- **Organization name (AR):** وزارة الإعلام
+- **Primary accent:** `#009B87` — teal taken from the ministry identity.
+  - If the ministry's official brand guide specifies a different hex, override `Organization.brandAccent` (per-org) and the `--accent` fallback in `src/config/tokens.css`.
+- **Accent ink (text over accent):** `#FFFFFF` for 16px+ / 14px+ bold. For smaller text on accent or fine rules, use `--accent-strong` (`#00705E`) instead.
+- **Logo:** place the file at `public/brand/ministry-of-media.png`. Reference it from `Organization.logoUrl = "/brand/ministry-of-media.png"`. Logo renders at 24px height, bottom-left of the public RSVP page, `opacity: 0.9` (raise from the generic 60% for an official mark). In the admin top bar, render the org name, not the logo — the logo is reserved for public-facing surfaces and printed collateral.
+- **Default locale:** `ar` (Arabic-first). English is available via the locale toggle but Arabic is the primary surface.
+- **Default timezone:** `Asia/Riyadh`.
+- **Typography:**
+  - Arabic: **IBM Plex Sans Arabic** at 500/400 weights. Keep tracking default.
+  - Latin (English): **Inter** at 500/400. If the ministry brand guide specifies **Neue Haas Grotesk** / **29LT Bukra**, swap only the two `--font-latin` / `--font-arabic` tokens.
+- **Tone:** formal, restrained, respectful. Default invite opening (AR): `السلام عليكم ورحمة الله،` followed by personal salutation if `firstName` exists. English opening: `Dear {firstName},`. Do not use casual language, emoji, or informal interjections in any default template.
+- **Email from name:** `Ministry of Media` / `وزارة الإعلام`. Reply-to = `events@mom.example.sa` until the real domain is provisioned.
+- **SMS sender ID:** request approval for `MOM` (EN campaigns) and for Arabic sender where the provider supports it. In mock mode, sender ID reads `MOM`.
+- **Color contrast discipline:** the teal does not carry status. Never color-code status (Accepted / Declined / Pending) using the accent — status stays with the monochrome dot + text-color shift rule from §15.
+- **Privacy posture:** ministry context → treat all guest contact data as sensitive. Retention default drops to **30 days** for rendered message bodies (override of the generic 90 in §17). Audit logs retain indefinitely.
 
 ---
 
