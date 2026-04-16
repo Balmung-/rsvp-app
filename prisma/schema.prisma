@@ -1,0 +1,327 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+enum Channel {
+  SMS
+  EMAIL
+}
+
+enum EventStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  ARCHIVED
+}
+
+enum RsvpStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum CampaignStatus {
+  DRAFT
+  QUEUED
+  SENDING
+  PAUSED
+  COMPLETED
+  FAILED
+}
+
+enum MessageStatus {
+  DRAFT
+  QUEUED
+  ACCEPTED
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  COMPLAINED
+  FAILED
+}
+
+enum SuppressionReason {
+  BOUNCE
+  COMPLAINT
+  UNSUBSCRIBE
+  MANUAL
+  INVALID
+}
+
+model Organization {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  defaultLocale   String   @default("ar")
+  defaultTimezone String   @default("Asia/Riyadh")
+  logoUrl         String?
+  brandAccent     String   @default("#009B87")
+  supportEmail    String?
+  supportPhone    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  users        User[]
+  events       Event[]
+  guests       Guest[]
+  templates    Template[]
+  suppressions Suppression[]
+  auditLogs    AuditLog[]
+}
+
+model User {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  email          String   @unique
+  passwordHash   String?
+  role           Role     @default(VIEWER)
+  locale         String   @default("ar")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sessions     Session[]
+  auditLogs    AuditLog[]
+
+  @@index([organizationId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Event {
+  id             String      @id @default(cuid())
+  organizationId String
+  title          String
+  slug           String
+  description    String?
+  venueName      String?
+  venueAddress   String?
+  mapUrl         String?
+  startsAt       DateTime
+  endsAt         DateTime?
+  timezone       String      @default("Asia/Riyadh")
+  rsvpDeadline   DateTime?
+  dressCode      String?
+  heroImageUrl   String?
+  status         EventStatus @default(DRAFT)
+  settingsJson   Json        @default("{}")
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitees         Invitee[]
+  campaigns        Campaign[]
+  outboundMessages OutboundMessage[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, status])
+}
+
+model Guest {
+  id              String   @id @default(cuid())
+  organizationId  String
+  firstName       String?
+  lastName        String?
+  fullName        String
+  email           String?
+  phoneE164       String?
+  preferredLocale String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitees     Invitee[]
+
+  @@index([organizationId])
+  @@index([organizationId, email])
+  @@index([organizationId, phoneE164])
+}
+
+model Invitee {
+  id             String     @id @default(cuid())
+  eventId        String
+  guestId        String
+  partySizeLimit Int        @default(1)
+  allowPlusOne   Boolean    @default(false)
+  tagsJson       Json       @default("[]")
+  rsvpStatus     RsvpStatus @default(PENDING)
+  respondedAt    DateTime?
+  responseSource String?
+  tokenHash      String     @unique
+  tokenVersion   Int        @default(1)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  event            Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  guest            Guest             @relation(fields: [guestId], references: [id], onDelete: Restrict)
+  outboundMessages OutboundMessage[]
+  rsvpResponses    RsvpResponse[]
+
+  @@unique([eventId, guestId])
+  @@index([eventId, rsvpStatus])
+}
+
+model Template {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  channel        Channel
+  locale         String
+  subject        String?
+  preheader      String?
+  bodyMarkdown   String?
+  smsBody        String?
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaigns    Campaign[]
+
+  @@index([organizationId, channel, locale])
+}
+
+model Campaign {
+  id                 String         @id @default(cuid())
+  eventId            String
+  channel            Channel
+  templateId         String
+  status             CampaignStatus @default(DRAFT)
+  audienceFilterJson Json           @default("{}")
+  scheduledAt        DateTime?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  createdByUserId    String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  event            Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  template         Template          @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  outboundMessages OutboundMessage[]
+
+  @@index([eventId, status])
+}
+
+model OutboundMessage {
+  id                 String        @id @default(cuid())
+  campaignId         String
+  eventId            String
+  inviteeId          String
+  channel            Channel
+  provider           String
+  providerMessageId  String?
+  senderIdentity     String
+  recipientEmail     String?
+  recipientPhoneE164 String?
+  renderedSubject    String?
+  renderedText       String?
+  renderedHtml       String?
+  trackedLink        String?
+  status             MessageStatus @default(DRAFT)
+  lastErrorCode      String?
+  lastErrorMessage   String?
+  acceptedAt         DateTime?
+  deliveredAt        DateTime?
+  openedAt           DateTime?
+  clickedAt          DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  invitee  Invitee  @relation(fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerMessageId])
+  @@index([campaignId, status])
+  @@index([inviteeId])
+}
+
+model RsvpResponse {
+  id            String     @id @default(cuid())
+  inviteeId     String
+  status        RsvpStatus
+  attendeeCount Int        @default(1)
+  note          String?
+  locale        String
+  submittedAt   DateTime   @default(now())
+  ipHash        String?
+  userAgent     String?
+
+  invitee Invitee @relation(fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@index([inviteeId, submittedAt])
+}
+
+model WebhookReceipt {
+  id                String    @id @default(cuid())
+  provider          String
+  channel           Channel
+  signatureVerified Boolean
+  dedupeKey         String    @unique
+  payloadJson       Json
+  receivedAt        DateTime  @default(now())
+  processedAt       DateTime?
+  processingError   String?
+}
+
+model Suppression {
+  id             String            @id @default(cuid())
+  organizationId String
+  channel        Channel
+  value          String
+  reason         SuppressionReason
+  source         String
+  createdAt      DateTime          @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, channel, value])
+}
+
+model RateLimitBucket {
+  key       String   @id
+  tokens    Float
+  updatedAt DateTime @default(now())
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  actorUserId    String?
+  entityType     String
+  entityId       String
+  action         String
+  metadataJson   Json     @default("{}")
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, entityType, entityId])
+}

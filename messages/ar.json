@@ -1,0 +1,113 @@
+{
+  "common": {
+    "back": "رجوع",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "loading": "جارٍ التحميل",
+    "error": "حدث خطأ",
+    "retry": "إعادة المحاولة",
+    "optional": "اختياري",
+    "yes": "نعم",
+    "no": "لا",
+    "close": "إغلاق",
+    "search": "بحث",
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج",
+    "language": "اللغة"
+  },
+  "admin": {
+    "nav": {
+      "events": "الفعاليات",
+      "templates": "القوالب",
+      "settings": "الإعدادات"
+    },
+    "events": {
+      "title": "الفعاليات",
+      "new": "فعالية جديدة",
+      "columns": {
+        "title": "العنوان",
+        "date": "التاريخ",
+        "status": "الحالة",
+        "responded": "الردود"
+      },
+      "status": {
+        "DRAFT": "مسودة",
+        "SCHEDULED": "مجدولة",
+        "LIVE": "قائمة",
+        "ARCHIVED": "مؤرشفة"
+      }
+    },
+    "workspace": {
+      "tabs": {
+        "overview": "نظرة عامة",
+        "guests": "المدعوون",
+        "compose": "التأليف",
+        "delivery": "الإرسال",
+        "responses": "الردود"
+      },
+      "overview": {
+        "invited": "تمت الدعوة",
+        "accepted": "أكدوا الحضور",
+        "declined": "اعتذروا",
+        "pending": "بانتظار الرد",
+        "activity": "النشاط الأخير"
+      },
+      "guests": {
+        "import": "استيراد من CSV",
+        "columns": {
+          "name": "الاسم",
+          "contact": "وسيلة التواصل",
+          "tags": "الوسوم",
+          "rsvp": "الرد",
+          "party": "العدد",
+          "updated": "آخر تحديث"
+        }
+      },
+      "compose": {
+        "channel": "القناة",
+        "sms": "رسالة نصية",
+        "email": "بريد إلكتروني",
+        "locale": "اللغة",
+        "template": "القالب",
+        "audience": "الفئة المستهدفة",
+        "preview": "معاينة",
+        "shuffle": "عرض مستقبل آخر",
+        "schedule": "الجدولة",
+        "sendNow": "إرسال الآن",
+        "sendScheduled": "جدولة الإرسال",
+        "saveDraft": "حفظ كمسودة"
+      },
+      "delivery": {
+        "sent": "مُرسلة",
+        "delivered": "وصلت",
+        "opened": "فُتحت",
+        "clicked": "نُقرت",
+        "bounced": "مرتدة"
+      }
+    }
+  },
+  "public": {
+    "rsvp": {
+      "eyebrow": "لقد تلقيتم دعوة",
+      "greeting": "عزيزي {name}،",
+      "accept": "سأحضر",
+      "decline": "اعتذار",
+      "attendeeCount": "عدد الحضور",
+      "note": "ملاحظة (اختياري)",
+      "noteDecline": "أي كلمة تودّ إضافتها؟",
+      "plusOne": "مرافق",
+      "confirm": "تأكيد",
+      "back": "رجوع",
+      "thanksAccepted": "تم تأكيد حضوركم.",
+      "thanksDeclined": "نشكركم على إبلاغنا.",
+      "addToCalendar": "إضافة إلى التقويم",
+      "openMap": "الخريطة",
+      "editResponse": "تعديل الرد",
+      "rsvpClosed": "تم إغلاق باب الرد.",
+      "linkInvalid": "هذا الرابط لم يعد صالحًا. يرجى التواصل مع {contact}."
+    }
+  }
+}

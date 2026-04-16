@@ -1,0 +1,113 @@
+{
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "optional": "optional",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "search": "Search",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "admin": {
+    "nav": {
+      "events": "Events",
+      "templates": "Templates",
+      "settings": "Settings"
+    },
+    "events": {
+      "title": "Events",
+      "new": "New event",
+      "columns": {
+        "title": "Title",
+        "date": "Date",
+        "status": "Status",
+        "responded": "Responded"
+      },
+      "status": {
+        "DRAFT": "Draft",
+        "SCHEDULED": "Scheduled",
+        "LIVE": "Live",
+        "ARCHIVED": "Archived"
+      }
+    },
+    "workspace": {
+      "tabs": {
+        "overview": "Overview",
+        "guests": "Guests",
+        "compose": "Compose",
+        "delivery": "Delivery",
+        "responses": "Responses"
+      },
+      "overview": {
+        "invited": "Invited",
+        "accepted": "Accepted",
+        "declined": "Declined",
+        "pending": "Pending",
+        "activity": "Recent activity"
+      },
+      "guests": {
+        "import": "Import CSV",
+        "columns": {
+          "name": "Name",
+          "contact": "Contact",
+          "tags": "Tags",
+          "rsvp": "RSVP",
+          "party": "Party",
+          "updated": "Updated"
+        }
+      },
+      "compose": {
+        "channel": "Channel",
+        "sms": "SMS",
+        "email": "Email",
+        "locale": "Locale",
+        "template": "Template",
+        "audience": "Audience",
+        "preview": "Preview",
+        "shuffle": "Shuffle preview",
+        "schedule": "Schedule",
+        "sendNow": "Send now",
+        "sendScheduled": "Schedule send",
+        "saveDraft": "Save draft"
+      },
+      "delivery": {
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "opened": "Opened",
+        "clicked": "Clicked",
+        "bounced": "Bounced"
+      }
+    }
+  },
+  "public": {
+    "rsvp": {
+      "eyebrow": "You're invited",
+      "greeting": "Dear {name},",
+      "accept": "Accept",
+      "decline": "Decline",
+      "attendeeCount": "Attendees",
+      "note": "Note (optional)",
+      "noteDecline": "Anything you'd like to say?",
+      "plusOne": "Plus one",
+      "confirm": "Confirm",
+      "back": "Back",
+      "thanksAccepted": "You're confirmed.",
+      "thanksDeclined": "Thank you for letting us know.",
+      "addToCalendar": "Add to calendar",
+      "openMap": "Open map",
+      "editResponse": "Edit response",
+      "rsvpClosed": "RSVP closed.",
+      "linkInvalid": "This invitation link is no longer valid. Please contact {contact}."
+    }
+  }
+}
