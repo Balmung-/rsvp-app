@@ -85,6 +85,10 @@ Check the **Deploy Logs** (not Build Logs) for the web service.
 - `Environment variable not found: AUTH_SECRET` — set the secret in the web service Variables.
 - `migrate deploy` reports pending migrations — it applies them automatically on next boot.
 
+### If the build fails with `<Html> should not be imported outside of pages/_document`
+
+You have `NODE_ENV` set in the service Variables. Delete it. `next build` auto-sets `NODE_ENV=production`; overriding it (especially to `development`) pulls in dev-only Next.js code that references `next/document` Html, which then breaks prerender of `/404`.
+
 ## Logo
 
 Place the ministry logo at `public/brand/ministry-of-media.png`. The seeded organisation references it from there.
