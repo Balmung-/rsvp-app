@@ -8,6 +8,7 @@ export interface RenderContext {
   guest: Guest;
   invitee: Invitee;
   rsvpLink: string;
+  unsubscribeLink?: string | null;
   locale: "en" | "ar";
 }
 
@@ -85,6 +86,7 @@ export function renderEmail(template: Template, ctx: RenderContext): RenderedEma
     eventDateTime: vars["event.startsAt"] ?? "",
     eventVenue: ctx.event.venueName ?? "",
     rsvpLink: ctx.rsvpLink,
+    unsubscribeLink: ctx.unsubscribeLink ?? null,
     supportEmail: ctx.org.supportEmail ?? null,
   });
 

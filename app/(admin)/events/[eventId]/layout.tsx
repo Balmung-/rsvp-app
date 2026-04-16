@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { formatEventDateTime, tzAbbrev } from "@/lib/datetime";
 import { SegmentedNav } from "@/ui/SegmentedNav";
 import { StatusDot } from "@/ui/StatusDot";
+import { WorkspaceHeaderActions } from "./WorkspaceHeader";
 
 export default async function EventWorkspaceLayout({
   children,
@@ -29,7 +30,27 @@ export default async function EventWorkspaceLayout({
           className="h-[3px] w-16 rounded-full mb-5"
           style={{ backgroundColor: event.organization.brandAccent }}
         />
-        <h1 className="text-h2 text-text mb-2">{event.title}</h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-h2 text-text mb-2">{event.title}</h1>
+          <WorkspaceHeaderActions
+            eventId={event.id}
+            initial={{
+              title: event.title,
+              slug: event.slug,
+              description: event.description,
+              venueName: event.venueName,
+              venueAddress: event.venueAddress,
+              mapUrl: event.mapUrl,
+              startsAt: event.startsAt.toISOString(),
+              endsAt: event.endsAt?.toISOString() ?? null,
+              timezone: event.timezone,
+              rsvpDeadline: event.rsvpDeadline?.toISOString() ?? null,
+              dressCode: event.dressCode,
+              heroImageUrl: event.heroImageUrl,
+              status: event.status,
+            }}
+          />
+        </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-small text-text-muted">
           <span>{formatEventDateTime(event.startsAt, event.timezone, locale)}</span>
           <span aria-hidden>·</span>

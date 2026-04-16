@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/ui/Button";
 import { Input, Label } from "@/ui/Input";
+import { TestSend } from "./TestSend";
 
 interface TemplateLite {
   id: string;
@@ -160,7 +161,7 @@ export function ComposeForm({
           </div>
         ) : null}
 
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex items-center gap-3 pt-2 flex-wrap">
           <Button
             onClick={onSend}
             loading={submitting}
@@ -169,6 +170,7 @@ export function ComposeForm({
             {timing === "later" ? "Schedule send" : "Send now"}
           </Button>
           <Button variant="secondary" onClick={onPreview} disabled={!templateId}>Preview</Button>
+          <TestSend eventId={eventId} templateId={templateId} channel={channel} />
         </div>
         {message ? <p className="text-small text-text-muted">{message}</p> : null}
       </form>

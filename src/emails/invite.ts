@@ -13,6 +13,7 @@ export interface InviteRenderInput {
   eventDateTime: string;
   eventVenue: string;
   rsvpLink: string;
+  unsubscribeLink: string | null;
   supportEmail: string | null;
 }
 
@@ -82,7 +83,8 @@ ${preheader}
   <hr style="border:none;border-top:1px solid #EAE8E3;margin:0 24px">
 
   <div style="padding:16px 24px 0;font-size:12px;color:#8A8A8F;line-height:18px">
-    <p style="margin:0">${e(footerPre)}${support}.</p>
+    <p style="margin:0 0 6px">${e(footerPre)}${support}.</p>
+    ${input.unsubscribeLink ? `<p style="margin:0"><a href="${e(input.unsubscribeLink)}" style="color:#8A8A8F;text-decoration:underline">${input.locale === "ar" ? "إلغاء الاشتراك" : "Unsubscribe"}</a></p>` : ""}
   </div>
 </div>
 </body>

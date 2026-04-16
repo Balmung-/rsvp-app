@@ -10,7 +10,7 @@ export default async function OverviewPage({
   const user = await requireUser();
   const { eventId } = await params;
 
-  const [event, invited, accepted, declined, pending, recentMessages, recentResponses] = await Promise.all([
+  const [event, invited, accepted, declined, pending, recentMessages, recentResponses, audit] = await Promise.all([
     prisma.event.findFirst({ where: { id: eventId, organizationId: user.organizationId } }),
     prisma.invitee.count({ where: { eventId } }),
     prisma.invitee.count({ where: { eventId, rsvpStatus: "ACCEPTED" } }),
@@ -27,6 +27,12 @@ export default async function OverviewPage({
       orderBy: { submittedAt: "desc" },
       take: 6,
       include: { invitee: { include: { guest: true } } },
+    }),
+    prisma.auditLog.findMany({
+      where: { organizationId: user.organizationId, entityType: { in: ["Event", "Campaign", "Invitee"] } },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      include: { actor: { select: { name: true } } },
     }),
   ]);
 
@@ -60,16 +66,22 @@ export default async function OverviewPage({
       <section>
         <h2 className="text-small text-text-subtle mb-4">Recent activity</h2>
         <ul className="flex flex-col gap-1">
-          {[...recentResponses.map((r) => ({
-            t: r.submittedAt,
-            text: `${r.invitee.guest.fullName} ${r.status === "ACCEPTED" ? "accepted" : "declined"}`,
-          })),
-          ...recentMessages.map((m) => ({
-            t: m.updatedAt,
-            text: `${m.channel.toLowerCase()} → ${m.invitee.guest.fullName}: ${m.status.toLowerCase()}`,
-          }))]
+          {[
+            ...recentResponses.map((r) => ({
+              t: r.submittedAt,
+              text: `${r.invitee.guest.fullName} ${r.status === "ACCEPTED" ? "accepted" : "declined"}`,
+            })),
+            ...recentMessages.map((m) => ({
+              t: m.updatedAt,
+              text: `${m.channel.toLowerCase()} → ${m.invitee.guest.fullName}: ${m.status.toLowerCase()}`,
+            })),
+            ...audit.map((a) => ({
+              t: a.createdAt,
+              text: `${a.actor?.name ?? "system"} · ${a.action.replace(/[._]/g, " ")}`,
+            })),
+          ]
             .sort((a, b) => b.t.getTime() - a.t.getTime())
-            .slice(0, 12)
+            .slice(0, 14)
             .map((row, i) => (
               <li key={i} className="flex items-baseline gap-4 py-2 border-b border-border last:border-b-0">
                 <span className="text-body text-text min-w-0 flex-1">{row.text}</span>
@@ -78,7 +90,7 @@ export default async function OverviewPage({
                 </span>
               </li>
             ))}
-          {recentResponses.length === 0 && recentMessages.length === 0 ? (
+          {recentResponses.length === 0 && recentMessages.length === 0 && audit.length === 0 ? (
             <li className="text-body text-text-muted py-2">No activity yet.</li>
           ) : null}
         </ul>

@@ -95,7 +95,9 @@ export async function handleDispatchCampaign(payload: DispatchCampaignPayload): 
       });
     }
 
-    const rsvpLink = `${process.env.APP_URL ?? "http://localhost:3000"}/r/${token}`;
+    const baseUrl = process.env.APP_URL ?? "http://localhost:3000";
+    const rsvpLink = `${baseUrl}/r/${token}`;
+    const unsubscribeLink = `${baseUrl}/u/${token}`;
     const locale: "en" | "ar" = (g.preferredLocale === "en" || g.preferredLocale === "ar")
       ? g.preferredLocale
       : (campaign.event.organization.defaultLocale === "en" ? "en" : "ar");
@@ -111,6 +113,7 @@ export async function handleDispatchCampaign(payload: DispatchCampaignPayload): 
         guest: g,
         invitee,
         rsvpLink,
+        unsubscribeLink,
         locale,
       });
       renderedSubject = out.subject;
@@ -123,6 +126,7 @@ export async function handleDispatchCampaign(payload: DispatchCampaignPayload): 
         guest: g,
         invitee,
         rsvpLink,
+        unsubscribeLink,
         locale,
       });
       renderedText = out.body;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireUserApi } from "@/lib/auth";
 import { renderEmail, renderSms } from "@/domain/messages/render";
 import { mintRsvpToken } from "@/lib/tokens";
 
@@ -11,7 +11,9 @@ export async function POST(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const user = await requireUser();
+  const gate = await requireUserApi();
+  if (!gate.ok) return NextResponse.json({ ok: false, error: gate.message }, { status: gate.status });
+  const user = gate.user;
   const { id } = await params;
   const campaign = await prisma.campaign.findFirst({
     where: { id, event: { organizationId: user.organizationId } },

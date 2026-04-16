@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireUserApi } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,7 +9,9 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ eventId: string }> }
 ): Promise<NextResponse> {
-  const user = await requireUser();
+  const gate = await requireUserApi();
+  if (!gate.ok) return NextResponse.json({ ok: false, error: gate.message }, { status: gate.status });
+  const user = gate.user;
   const { eventId } = await params;
 
   const event = await prisma.event.findFirst({

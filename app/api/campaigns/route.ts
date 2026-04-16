@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireRole } from "@/lib/auth";
+import { requireRoleApi } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,8 +19,12 @@ const Schema = z.object({
 });
 
 export async function POST(req: Request): Promise<NextResponse> {
-  const user = await requireRole(["OWNER", "EDITOR"]);
-  const parsed = Schema.parse(await req.json());
+  const gate = await requireRoleApi(["OWNER", "EDITOR"]);
+  if (!gate.ok) return NextResponse.json({ ok: false, error: gate.message }, { status: gate.status });
+  const user = gate.user;
+  let parsed;
+  try { parsed = Schema.parse(await req.json()); }
+  catch { return NextResponse.json({ ok: false, error: "BAD_INPUT" }, { status: 400 }); }
 
   const event = await prisma.event.findFirst({
     where: { id: parsed.eventId, organizationId: user.organizationId },

@@ -93,9 +93,55 @@ You have `NODE_ENV` set in the service Variables. Delete it. `next build` auto-s
 
 Place the ministry logo at `public/brand/ministry-of-media.png`. The seeded organisation references it from there.
 
+## Features
+
+**Workspaces**
+- Events index + per-event workspace (Overview, Guests, Compose, Delivery, Responses)
+- Top-level Campaigns panel — every campaign across the org with delivery metrics
+- Top-level Guests directory — org-wide, dedup'd by email/phone, search, event count
+
+**Editing**
+- Edit any event (side sheet from workspace header) + delete
+- Edit / create / delete templates (per channel + locale, with default toggle)
+- Edit organisation brand (name, accent picker, logo, defaults, support contacts)
+- Change password from Settings → Account
+
+**Sending**
+- Compose: channel + locale + template + audience + schedule (now or later) + live preview
+- Test-send: ship one preview message to your email or phone before a full blast
+- One-click "Nudge non-responders" on the Responses tab
+- pg-boss queue, monotonic status machine, retries with backoff
+
+**Importing**
+- Drag-drop or click to upload .csv / .xlsx
+- Auto-mapped columns (English + Arabic header detection)
+- Live preview with per-column dropdowns
+- Server-side dedup by (org, email) and (org, phone), phones normalised to E.164
+
+**Reporting**
+- CSV export per status (accepted / declined / pending / all) with UTF-8 BOM for Excel
+- Per-invitee detail: contact, RSVP history, message history, copy current link, rotate token
+- Recent activity feed on the event overview
+
+**Compliance**
+- Email unsubscribe link in every send → /u/{token} page → Suppression auto-add
+- Manual suppression management (Settings → Suppressions): add, list, remove
+- Suppressions checked at dispatch time on every channel
+- Per-IP rate limit on /api/rsvp and webhook ingestion
+
+**Operational**
+- /api/_diag returns DB + env + seed state for fast triage
+- /api/health (always 200 if process is up) + /api/ready (DB-strict)
+- Webhook URLs for each provider displayed in Settings → Channels
+- Audit log written for every admin mutation
+
+**Internationalisation**
+- Arabic + English first-class, RTL on public RSVP and email
+- Locale auto-detected from invitee.preferredLocale → org default → header
+
 ## Stack
 
-Next.js 15 · TypeScript · Tailwind · Radix · Prisma · PostgreSQL · pg-boss · React Email · next-intl · Playwright
+Next.js 15 · TypeScript · Tailwind · Radix · Prisma · PostgreSQL · pg-boss · next-intl · Playwright · SheetJS
 
 ## Full spec
 
