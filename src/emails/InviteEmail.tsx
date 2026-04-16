@@ -1,9 +1,7 @@
 import {
   Body,
   Container,
-  Head,
   Hr,
-  Html,
   Link,
   Preview,
   Section,
@@ -31,8 +29,8 @@ export function InviteEmail(props: InviteEmailProps): React.ReactElement {
   const ctaLabel = props.locale === "ar" ? "تأكيد الحضور" : "Respond";
 
   return (
-    <Html lang={props.locale} dir={dir}>
-      <Head />
+    <html lang={props.locale} dir={dir}>
+      <head />
       {props.preheader ? <Preview>{props.preheader}</Preview> : null}
       <Body
         style={{
@@ -113,6 +111,6 @@ export function InviteEmail(props: InviteEmailProps): React.ReactElement {
           </Section>
         </Container>
       </Body>
-    </Html>
+    </html>
   );
 }
