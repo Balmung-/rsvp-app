@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { formatEventDateTime } from "@/lib/datetime";
 import { StatusDot } from "@/ui/StatusDot";
+import { ResponsesActions } from "./ResponsesActions";
 
 export default async function ResponsesPage({
   params,
@@ -31,16 +33,27 @@ export default async function ResponsesPage({
     <div className="flex flex-col gap-10">
       <section className="grid grid-cols-3 gap-8 md:gap-14">
         {[
-          { label: "Accepted", value: accepted },
-          { label: "Declined", value: declined },
-          { label: "Pending", value: pending },
+          { label: "Accepted", value: accepted, filter: "accepted" },
+          { label: "Declined", value: declined, filter: "declined" },
+          { label: "Pending", value: pending, filter: "pending" },
         ].map((m) => (
           <div key={m.label}>
-            <div className="text-micro text-text-subtle mb-2">{m.label}</div>
+            <div className="text-micro text-text-subtle mb-2 flex items-center justify-between">
+              <span>{m.label}</span>
+              <Link
+                href={`/api/events/${eventId}/export?filter=${m.filter}`}
+                className="text-small text-text-subtle hover:text-text transition-colors"
+                prefetch={false}
+              >
+                Export
+              </Link>
+            </div>
             <div className="text-[40px] leading-[44px] font-medium tracking-tight text-text tabular-nums">{m.value}</div>
           </div>
         ))}
       </section>
+
+      <ResponsesActions eventId={eventId} pendingCount={pending} />
 
       <section className="border-t border-border">
         <table className="w-full text-body">

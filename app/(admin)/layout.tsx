@@ -21,8 +21,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <aside className="w-60 shrink-0 border-e border-border px-3 py-6 hidden md:block">
           <nav className="flex flex-col gap-1">
             <NavLink href="/events">Events</NavLink>
+            <NavLink href="/campaigns">Campaigns</NavLink>
+            <NavLink href="/guests">Guests</NavLink>
             <NavLink href="/templates">Templates</NavLink>
-            <NavLink href="/settings/brand">Settings</NavLink>
+            <NavLink href="/settings/account">Settings</NavLink>
           </nav>
         </aside>
         <main className="flex-1 min-w-0 px-6 md:px-10 py-8 max-w-[1280px] mx-auto w-full">{children}</main>
