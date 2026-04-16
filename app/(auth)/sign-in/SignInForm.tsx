@@ -9,10 +9,10 @@ function humanise(code: string | null | undefined): string | null {
   if (!code) return null;
   switch (code) {
     case "Configuration":
-      return "The server is not configured correctly. AUTH_SECRET or trustHost may be missing on the host. Check the server logs.";
+      return "The server is not configured correctly. Check the server logs.";
     case "CredentialsSignin":
     case "CallbackRouteError":
-      return "Invalid email or password.";
+      return "Invalid username or password.";
     case "AccessDenied":
     case "Forbidden":
       return "Your account does not have access.";
@@ -30,8 +30,8 @@ export function SignInForm({
   error?: string;
   callbackUrl?: string;
 }): React.ReactElement {
-  const [email, setEmail] = useState("owner@example.com");
-  const [password, setPassword] = useState("demo-password");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(humanise(initialError));
 
@@ -40,7 +40,7 @@ export function SignInForm({
     setLoading(true);
     setError(null);
     const res = await signIn("credentials", {
-      email,
+      username,
       password,
       redirect: false,
       callbackUrl: callbackUrl ?? "/events",
@@ -51,7 +51,7 @@ export function SignInForm({
       return;
     }
     if (res.error) {
-      setError(humanise(res.error) ?? "Invalid email or password.");
+      setError(humanise(res.error) ?? "Invalid username or password.");
       return;
     }
     window.location.href = res.url ?? callbackUrl ?? "/events";
@@ -60,18 +60,34 @@ export function SignInForm({
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div>
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <Label htmlFor="username">Username</Label>
+        <Input
+          id="username"
+          name="username"
+          type="text"
+          autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
       </div>
       <div>
         <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
       </div>
       {error ? <p role="alert" className="text-small text-danger">{error}</p> : null}
       <Button size="md" type="submit" loading={loading}>Sign in</Button>
-      <p className="text-small text-text-subtle mt-4">
-        Demo: <span className="font-medium text-text-muted">owner@example.com</span> / <span className="font-medium text-text-muted">demo-password</span>
-      </p>
     </form>
   );
 }

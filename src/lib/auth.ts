@@ -6,8 +6,8 @@ import { verifyPassword } from "./hash";
 import { z } from "zod";
 
 const CredentialsSchema = z.object({
-  email: z.string().email().max(320),
-  password: z.string().min(6).max(200),
+  username: z.string().trim().min(2).max(64),
+  password: z.string().min(3).max(200),
 });
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
@@ -26,14 +26,16 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     Credentials({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(raw) {
         const parsed = CredentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
+        // Username is stored in the `email` column (kept for schema
+        // continuity). Lookup is case-insensitive.
         const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email.toLowerCase() },
+          where: { email: parsed.data.username.toLowerCase() },
         });
         if (!user || !user.passwordHash) return null;
         const ok = await verifyPassword(parsed.data.password, user.passwordHash);
