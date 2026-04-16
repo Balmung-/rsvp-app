@@ -1,6 +1,5 @@
-import { render as renderReactEmail } from "@react-email/render";
 import type { Event, Guest, Invitee, Organization, Template } from "@prisma/client";
-import { InviteEmail } from "@/emails/InviteEmail";
+import { renderInvite } from "@/emails/invite";
 import { formatEventDateTime } from "@/lib/datetime";
 
 export interface RenderContext {
@@ -68,46 +67,26 @@ export interface RenderedEmail {
   text: string;
 }
 
-export async function renderEmail(template: Template, ctx: RenderContext): Promise<RenderedEmail> {
+export function renderEmail(template: Template, ctx: RenderContext): RenderedEmail {
   const vars = buildVars(ctx);
   const subject = substitute(template.subject ?? "", vars, false);
   const preheader = template.preheader ? substitute(template.preheader, vars, false) : null;
   const body = substitute(template.bodyMarkdown ?? "", vars, true);
 
-  const html = await renderReactEmail(
-    InviteEmail({
-      locale: ctx.locale,
-      brandAccent: ctx.org.brandAccent,
-      orgName: ctx.org.name,
-      logoUrl: ctx.org.logoUrl ?? null,
-      subject,
-      preheader,
-      bodyHtml: body,
-      eventTitle: ctx.event.title,
-      eventDateTime: vars["event.startsAt"] ?? "",
-      eventVenue: ctx.event.venueName ?? "",
-      rsvpLink: ctx.rsvpLink,
-      supportEmail: ctx.org.supportEmail ?? null,
-    })
-  );
-
-  const text = await renderReactEmail(
-    InviteEmail({
-      locale: ctx.locale,
-      brandAccent: ctx.org.brandAccent,
-      orgName: ctx.org.name,
-      logoUrl: null,
-      subject,
-      preheader,
-      bodyHtml: body,
-      eventTitle: ctx.event.title,
-      eventDateTime: vars["event.startsAt"] ?? "",
-      eventVenue: ctx.event.venueName ?? "",
-      rsvpLink: ctx.rsvpLink,
-      supportEmail: ctx.org.supportEmail ?? null,
-    }),
-    { plainText: true }
-  );
+  const { html, text } = renderInvite({
+    locale: ctx.locale,
+    brandAccent: ctx.org.brandAccent,
+    orgName: ctx.org.name,
+    logoUrl: ctx.org.logoUrl ?? null,
+    subject,
+    preheader,
+    bodyHtml: body,
+    eventTitle: ctx.event.title,
+    eventDateTime: vars["event.startsAt"] ?? "",
+    eventVenue: ctx.event.venueName ?? "",
+    rsvpLink: ctx.rsvpLink,
+    supportEmail: ctx.org.supportEmail ?? null,
+  });
 
   return { subject, preheader, html, text };
 }
