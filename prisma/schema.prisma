@@ -175,6 +175,8 @@ model Invitee {
   responseSource String?
   tokenHash      String     @unique
   tokenVersion   Int        @default(1)
+  checkedInAt    DateTime?
+  checkedInCount Int        @default(0)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
@@ -185,6 +187,7 @@ model Invitee {
 
   @@unique([eventId, guestId])
   @@index([eventId, rsvpStatus])
+  @@index([eventId, checkedInAt])
 }
 
 model Template {

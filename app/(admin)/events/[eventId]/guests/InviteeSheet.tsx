@@ -30,6 +30,8 @@ interface InviteeDetail {
   rsvpStatus: "PENDING" | "ACCEPTED" | "DECLINED";
   respondedAt: string | null;
   tokenVersion: number;
+  checkedInAt: string | null;
+  checkedInCount: number;
   guest: {
     fullName: string;
     email: string | null;
@@ -37,6 +39,7 @@ interface InviteeDetail {
     preferredLocale: string | null;
   };
   rsvpUrl: string;
+  qrDataUrl: string;
   responses: Array<{
     id: string;
     status: "ACCEPTED" | "DECLINED";
@@ -166,6 +169,21 @@ export function InviteeSheet({
               <Button size="sm" variant="ghost" onClick={rotate} disabled={busy}>Rotate</Button>
             </div>
             <p className="text-small text-text-subtle mt-2">Rotating invalidates the current link and bumps the token version.</p>
+
+            <details className="mt-4">
+              <summary className="cursor-pointer text-small text-text-muted hover:text-text">Show QR code</summary>
+              <div className="mt-3 inline-flex flex-col items-center gap-2 p-4 border border-border rounded-md bg-surface">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={data.qrDataUrl} alt="RSVP QR code" width={240} height={240} className="block" />
+                <a
+                  href={data.qrDataUrl}
+                  download={`rsvp-${data.id}.png`}
+                  className="text-small text-text-muted hover:text-text underline decoration-border-strong underline-offset-4"
+                >
+                  Download
+                </a>
+              </div>
+            </details>
           </section>
 
           {data.responses.length > 0 ? (

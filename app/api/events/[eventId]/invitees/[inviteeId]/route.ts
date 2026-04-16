@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import QRCode from "qrcode";
 import { prisma } from "@/lib/db";
 import { requireRoleApi, requireUserApi } from "@/lib/auth";
 import { mintRsvpToken } from "@/lib/tokens";
@@ -35,6 +36,12 @@ export async function GET(
 
   const { token } = mintRsvpToken({ i: invitee.id, v: invitee.tokenVersion });
   const rsvpUrl = `${process.env.APP_URL ?? ""}/r/${token}`;
+  const qrDataUrl = await QRCode.toDataURL(rsvpUrl, {
+    margin: 1,
+    width: 320,
+    color: { dark: "#0F0F10", light: "#FFFFFF" },
+    errorCorrectionLevel: "M",
+  });
 
   return NextResponse.json({
     ok: true,
@@ -46,8 +53,11 @@ export async function GET(
       respondedAt: invitee.respondedAt,
       tokenVersion: invitee.tokenVersion,
       tagsJson: invitee.tagsJson,
+      checkedInAt: invitee.checkedInAt,
+      checkedInCount: invitee.checkedInCount,
       guest: invitee.guest,
       rsvpUrl,
+      qrDataUrl,
       responses: invitee.rsvpResponses,
       messages: invitee.outboundMessages,
     },

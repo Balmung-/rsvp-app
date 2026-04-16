@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { SignOutButton } from "./SignOutButton";
+import { Toaster } from "@/ui/Toaster";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }): Promise<React.ReactElement> {
   const session = await auth();
@@ -29,6 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </aside>
         <main className="flex-1 min-w-0 px-6 md:px-10 py-8 max-w-[1280px] mx-auto w-full">{children}</main>
       </div>
+      <Toaster />
     </div>
   );
 }
