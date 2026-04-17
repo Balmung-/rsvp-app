@@ -20,18 +20,27 @@ const DOT: Record<ToastKind, string> = {
   error: "bg-danger",
 };
 
-export function Toaster(): React.ReactElement {
+/**
+ * Client-only toast stack. Mount-gated so nothing from Radix Toast (portals,
+ * measurement) runs during SSR — prevents hydration mismatches.
+ */
+export function Toaster(): React.ReactElement | null {
+  const [mounted, setMounted] = React.useState(false);
   const [items, setItems] = React.useState<Item[]>([]);
 
   React.useEffect(() => {
+    setMounted(true);
     function onToast(e: Event): void {
       const ce = e as CustomEvent<ToastDetail>;
+      if (!ce?.detail) return;
       const item: Item = { id: nextId++, text: ce.detail.text, kind: ce.detail.kind };
       setItems((s) => [...s, item]);
     }
     window.addEventListener("app:toast", onToast as EventListener);
     return () => window.removeEventListener("app:toast", onToast as EventListener);
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <RT.Provider swipeDirection="right" duration={4500}>
