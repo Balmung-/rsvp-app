@@ -11,4 +11,5 @@ function run(cmd) {
 }
 
 run("npx --no-install prisma migrate deploy");
+run("node scripts/bootstrap.mjs");
 run("npx --no-install next start");
