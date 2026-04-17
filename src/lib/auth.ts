@@ -52,6 +52,21 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    // Keep every redirect on the site's own origin. If NextAuth is handed an
+    // absolute URL that points elsewhere (e.g. the internal container host),
+    // collapse it to a relative path + the current baseUrl so the browser
+    // never follows a bad host.
+    async redirect({ url, baseUrl }) {
+      try {
+        if (url.startsWith("/")) return `${baseUrl}${url}`;
+        const parsed = new URL(url);
+        const base = new URL(baseUrl);
+        if (parsed.host === base.host) return url;
+        return `${baseUrl}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        return baseUrl;
+      }
+    },
     async jwt({ token, user }) {
       if (user) {
         const u = user as { id: string; role: string; organizationId: string; locale: string };

@@ -54,7 +54,11 @@ export function SignInForm({
       setError(humanise(res.error) ?? "Invalid username or password.");
       return;
     }
-    window.location.href = res.url ?? callbackUrl ?? "/events";
+    // Always navigate via a same-origin path. Ignore res.url — NextAuth may
+    // return it using the internal container host (e.g. localhost:8080)
+    // when the deploy proxy doesn't forward Host headers the way it expects.
+    const dest = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/events";
+    window.location.href = dest;
   }
 
   return (
